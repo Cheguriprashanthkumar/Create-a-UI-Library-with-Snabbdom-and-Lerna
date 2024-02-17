@@ -1,0 +1,14 @@
+my-ui-library-monorepo/
+  packages/
+    ui-library/
+      src/
+        index.ts
+      package.json
+      tsconfig.json
+    demo-app/
+      src/
+        index.ts
+      package.json
+      tsconfig.json
+  lerna.json
+  package.json
