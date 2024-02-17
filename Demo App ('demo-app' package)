@@ -1,0 +1,17 @@
+import { createUIComponent, render, UIComponent } from 'ui-library';
+
+const initialState = { count: 0 };
+
+const App: UIComponent = createUIComponent((state, updateState) => {
+  const increment = () => updateState({ count: state.count + 1 });
+
+  return (
+    <div>
+      <h1>{state.count}</h1>
+      <button onclick={increment}>Add</button>
+    </div>
+  );
+});
+
+const root = document.getElementById('root');
+if (root) render(App, root);
