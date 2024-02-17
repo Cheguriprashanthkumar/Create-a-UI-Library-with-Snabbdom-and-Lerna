@@ -1,0 +1,64 @@
+import { init } from 'snabbdom';
+import { classModule } from 'snabbdom/modules/class';
+import { propsModule } from 'snabbdom/modules/props';
+import { styleModule } from 'snabbdom/modules/style';
+import { eventListenersModule } from 'snabbdom/modules/eventlisteners';
+
+export interface VNode {
+  sel: string | undefined;
+  data: VNodeData | undefined;
+  children: Array<VNode | string> | undefined;
+  elm: Node | undefined;
+  text: string | undefined;
+  key: string | number | undefined;
+}
+
+export interface VNodeData {
+  props?: any;
+  on?: any;
+}
+
+export interface UIComponent {
+  template: (state: any, updateState: (newState: any) => void) => VNode;
+  state: any;
+  setState: (newState: any) => void;
+  onMount?: () => void;
+  onStateChange?: (newState: any) => void;
+}
+
+export function createUIComponent(template: UIComponent['template']): UIComponent {
+  let state: any = {};
+  let update: ((newState: any) => void) | null = null;
+
+  function setState(newState: any) {
+    state = { ...state, ...newState };
+    if (update) update(state);
+  }
+
+  const vnode: VNode = template(state, setState);
+
+  return {
+    template,
+    state,
+    setState,
+    onMount: () => console.log('Component mounted'),
+    onStateChange: (newState: any) => console.log('State changed:', newState)
+  };
+}
+
+const patch = init([classModule, propsModule, styleModule, eventListenersModule]);
+
+export function render(component: UIComponent, container: Element) {
+  function update(newState: any) {
+    component.state = { ...component.state, ...newState };
+    const newVNode = component.template(component.state, component.setState);
+    patch(component.vnode, newVNode);
+    component.vnode = newVNode;
+    if (component.onStateChange) component.onStateChange(component.state);
+  }
+
+  if (component.onMount) component.onMount();
+  const vnode = component.template(component.state, update);
+  component.vnode = vnode;
+  patch(container, vnode);
+}
